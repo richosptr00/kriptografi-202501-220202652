@@ -1,95 +1,54 @@
-# Laporan Praktikum Kriptografi
-Minggu ke-: X  
-Topik: [judul praktikum]  
-Nama: [Nama Mahasiswa]  
-NIM: [NIM Mahasiswa]  
-Kelas: [Kelas]  
+# Laporan Praktikum Kriptografi  
+Minggu ke-: 11  
+Topik: Secret Sharing  
+Nama: Richo Ali Hasan Saputra  
+NIM: 220202652  
+Kelas: 1KEAS / 5IKKA  
 
 ---
 
-## 1. Tujuan
-(Tuliskan tujuan pembelajaran praktikum sesuai modul.)
+## 1. Tujuan  
+Memahami prinsip dasar dan implementasi algoritma Secret Sharing, khususnya skema Shamir's Secret Sharing, untuk membagi dan merekonstruksi informasi rahasia secara aman dan terdistribusi.
 
 ---
 
-## 2. Dasar Teori
-(Ringkas teori relevan (cukup 2–3 paragraf).  
-Contoh: definisi cipher klasik, konsep modular aritmetika, dll.  )
+## 2. Dasar Teori  
+Secret Sharing adalah metode kriptografi yang memungkinkan suatu rahasia dibagi menjadi beberapa bagian (share), sehingga hanya kombinasi tertentu dari bagian-bagian tersebut yang dapat digunakan untuk merekonstruksi rahasia. Teknik ini sangat berguna dalam sistem yang membutuhkan kolaborasi antar pihak untuk mengakses data sensitif.
+
+Shamir's Secret Sharing adalah salah satu algoritma paling populer dalam kategori ini. Ia menggunakan polinomial acak dengan derajat _t-1_ (di mana _t_ adalah threshold) dan prinsip interpolasi Lagrange untuk merekonstruksi rahasia. Setiap share adalah hasil substitusi nilai _x_ ke dalam polinomial. Rahasia dapat direkonstruksi hanya jika jumlah share yang dikumpulkan ≥ _t_.
 
 ---
 
-## 3. Alat dan Bahan
-(- Python 3.x  
+## 3. Alat dan Bahan  
+- Python 3.x  
 - Visual Studio Code / editor lain  
 - Git dan akun GitHub  
-- Library tambahan (misalnya pycryptodome, jika diperlukan)  )
+- Library tambahan: `sympy`, `random`
 
 ---
 
-## 4. Langkah Percobaan
-(Tuliskan langkah yang dilakukan sesuai instruksi.  
-Contoh format:
-1. Membuat file `caesar_cipher.py` di folder `praktikum/week2-cryptosystem/src/`.
-2. Menyalin kode program dari panduan praktikum.
-3. Menjalankan program dengan perintah `python caesar_cipher.py`.)
+## 4. Langkah Percobaan  
+1. Membuat file `secret_sharing.py` di folder `praktikum/week11-secret-sharing/src/`.  
+2. Menyalin kode program dari modul praktikum.  
+3. Menjalankan program dengan perintah `python secret_sharing.py`.  
+4. Menguji pembagian dan rekonstruksi rahasia dengan berbagai kombinasi threshold dan jumlah share.
 
 ---
 
-## 5. Source Code
-(Salin kode program utama yang dibuat atau dimodifikasi.  
-Gunakan blok kode:
-
+## 5. Source Code  
 ```python
-# contoh potongan kode
-def encrypt(text, key):
-    return ...
-```
-)
+from sympy import symbols, interpolate
+import random
 
----
+def generate_shares(secret, threshold, num_shares):
+    x = symbols('x')
+    coeffs = [secret] + [random.randint(1, 100) for _ in range(threshold - 1)]
+    poly = sum(c * x**i for i, c in enumerate(coeffs))
+    shares = [(i, poly.subs(x, i)) for i in range(1, num_shares + 1)]
+    return shares
 
-## 6. Hasil dan Pembahasan
-(- Lampirkan screenshot hasil eksekusi program (taruh di folder `screenshots/`).  
-- Berikan tabel atau ringkasan hasil uji jika diperlukan.  
-- Jelaskan apakah hasil sesuai ekspektasi.  
-- Bahas error (jika ada) dan solusinya. 
-
-Hasil eksekusi program Caesar Cipher:
-
-![Hasil Eksekusi](screenshots/output.png)
-![Hasil Input](screenshots/input.png)
-![Hasil Output](screenshots/output.png)
-)
-
----
-
-## 7. Jawaban Pertanyaan
-(Jawab pertanyaan diskusi yang diberikan pada modul.  
-- Pertanyaan 1: …  
-- Pertanyaan 2: …  
-)
----
-
-## 8. Kesimpulan
-(Tuliskan kesimpulan singkat (2–3 kalimat) berdasarkan percobaan.  )
-
----
-
-## 9. Daftar Pustaka
-(Cantumkan referensi yang digunakan.  
-Contoh:  
-- Katz, J., & Lindell, Y. *Introduction to Modern Cryptography*.  
-- Stallings, W. *Cryptography and Network Security*.  )
-
----
-
-## 10. Commit Log
-(Tuliskan bukti commit Git yang relevan.  
-Contoh:
-```
-commit abc12345
-Author: Nama Mahasiswa <email>
-Date:   2025-09-20
-
-    week2-cryptosystem: implementasi Caesar Cipher dan laporan )
-```
+def reconstruct_secret(shares):
+    x = symbols('x')
+    points = [(s[0], s[1]) for s in shares]
+    poly = interpolate(points, x)
+    return poly.subs(x, 0)
